@@ -1,0 +1,4 @@
+# created by virtualenv automatically
+*.pth
+/train/best_model.pth
+/train/best_model_2.pth
