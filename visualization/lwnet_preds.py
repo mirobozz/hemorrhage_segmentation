@@ -9,7 +9,6 @@ import my_utils.config
 import albumentations as A
 import pandas as pd
 
-
 colors = {
     "TP": [0, 255, 0],
     "FP": [0, 0, 255],
@@ -114,8 +113,8 @@ if __name__ == "__main__":
     )
 
     model_path = "../train/lwnet_trained.pth"
-    checkpoint = torch.load(model_path, map_location=my_utils.config.DEVICE)
-    model.load_state_dict(checkpoint["model_state_dict"])
+    #checkpoint = torch.load(model_path, map_location=my_utils.config.DEVICE)
+    #model.load_state_dict(checkpoint["model_state_dict"])
     model = model.to(my_utils.config.DEVICE)
 
     save_predictions(model, dataloader, output_dir)

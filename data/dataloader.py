@@ -21,8 +21,13 @@ class SegmentationDataset(Dataset):
         mask_path = os.path.join(self.masks_dir, self.masks[idx])
 
         image = cv2.imread(img_path)
+        if image is None:
+            raise ValueError(f"Image not loaded: {img_path}")
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+        if mask is None:
+            raise ValueError(f"Mask not loaded: {mask_path}")
 
         mask = (mask > 0).astype('float32')
 

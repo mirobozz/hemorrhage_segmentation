@@ -10,8 +10,8 @@ model = smp.Unet(
     activation=ACTIVATION,
 )
 
-for i, block in enumerate(model.decoder.blocks):
-    block.add_module("dropout", nn.Dropout(p=0.5))
+#for i, block in enumerate(model.decoder.blocks):
+#    block.add_module("dropout", nn.Dropout(p=0.5))
 
 model.to(DEVICE)
 print(model)

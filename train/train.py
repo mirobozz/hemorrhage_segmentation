@@ -11,9 +11,6 @@ loss_fn = focal_loss
 
 train_transform = A.Compose([
     A.Resize(256, 256),
-    A.HorizontalFlip(p=0.5),
-    A.VerticalFlip(p=0.5),
-    A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, p=0.5),
     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ToTensorV2(),
 ])
@@ -63,31 +60,33 @@ for epoch in range(start_epoch, NUM_EPOCHS + 1):
     train_ious.append(train_iou)
     print(f"Train Loss: {train_loss:.4f}, IoU: {train_iou:.4f}")
 
-    val_loss, val_iou = None, None
     compute_full_metrics = epoch % 10 == 0
-    val_loss, val_iou, val_metrics = validate_one_epoch(
-        model, val_loader, loss_fn, DEVICE, epoch, compute_full_metrics
-    )
-    val_losses.append(val_loss)
-    val_ious.append(val_iou)
-    print(f"Validation Loss: {val_loss:.4f}, IoU: {val_iou:.4f}")
+    val_loss, val_iou = None, None
 
     if compute_full_metrics:
+
+        val_loss, val_iou, val_metrics = validate_one_epoch(
+            model, val_loader, loss_fn, DEVICE, epoch, compute_full_metrics
+        )
+        val_losses.append(val_loss)
+        val_ious.append(val_iou)
+        print(f"Validation Loss: {val_loss:.4f}, IoU: {val_iou:.4f}")
+
         print(
             f"Validation Dice: {val_metrics['dice']:.4f}, "
             f"Precision: {val_metrics['precision']:.4f}, "
             f"Recall: {val_metrics['recall']:.4f}"
         )
 
-    if val_iou > best_val_iou:
-        best_val_iou = val_iou
-        torch.save({
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'epoch': epoch,
-            'best_val_iou': best_val_iou,
-        }, "best_model.pth")
-        print(f"Best model saved with IoU: {best_val_iou:.4f}")
+        if val_iou > best_val_iou:
+            best_val_iou = val_iou
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'epoch': epoch,
+                'best_val_iou': best_val_iou,
+            }, "best_model.pth")
+            print(f"Best model saved with IoU: {best_val_iou:.4f}")
 
 test_loss, test_iou, test_metrics = test_one_epoch(model, test_loader, loss_fn, DEVICE, compute_full_metrics=True)
 test_losses.append(test_loss)
