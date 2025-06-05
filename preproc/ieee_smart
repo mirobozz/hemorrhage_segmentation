@@ -1,0 +1,74 @@
+import os
+import cv2
+import numpy as np
+
+original_images_path = 'D:/bp_dataset/ieee_base/train/images'
+original_masks_path = 'D:/bp_dataset/ieee_base/train/masks'
+
+output_image_dir = 'D:/bp_dataset/ieee_smartclipper/train/images'
+output_mask_dir = 'D:/bp_dataset/ieee_smartclipper/train/masks'
+
+patch_size = 256
+min_area_threshold = 10
+
+os.makedirs(output_image_dir, exist_ok=True)
+os.makedirs(output_mask_dir, exist_ok=True)
+
+def get_patch_coords(center_x, center_y, img_w, img_h, patch_size):
+    start_x = max(0, min(center_x - patch_size // 2, img_w - patch_size))
+    start_y = max(0, min(center_y - patch_size // 2, img_h - patch_size))
+    return start_x, start_y
+
+def save_patch(image, mask, start_x, start_y, patch_size, base_name, patch_id):
+    img_patch = image[start_y:start_y + patch_size, start_x:start_x + patch_size]
+    mask_patch = mask[start_y:start_y + patch_size, start_x:start_x + patch_size]
+
+    img_patch_name = f"{base_name}_smart_{patch_id}.jpg"
+    mask_patch_name = f"{base_name}_smart_{patch_id}.png"
+
+    cv2.imwrite(os.path.join(output_image_dir, img_patch_name), img_patch, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
+    cv2.imwrite(os.path.join(output_mask_dir, mask_patch_name), mask_patch)
+
+def main():
+    image_files = [f for f in os.listdir(original_images_path) if f.lower().endswith('.jpg')]
+
+    for image_name in image_files:
+        base_name = os.path.splitext(image_name)[0]
+        image_path = os.path.join(original_images_path, image_name)
+        mask_name = base_name + '_HE.tif'
+        mask_path = os.path.join(original_masks_path, mask_name)
+
+        if not os.path.exists(mask_path):
+            print(f"Mask not found for {image_name}, skipping.")
+            continue
+
+        image = cv2.imread(image_path)
+        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+
+        if image is None or mask is None:
+            print(f"Error loading image or mask for {image_name}")
+            continue
+
+        img_h, img_w = image.shape[:2]
+
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        patch_id = 0
+
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            if area < min_area_threshold:
+                continue  # игнорируем слишком маленькие кровоизлияния
+
+            M = cv2.moments(cnt)
+            if M['m00'] == 0:
+                continue
+            center_x = int(M['m10'] / M['m00'])
+            center_y = int(M['m01'] / M['m00'])
+
+            start_x, start_y = get_patch_coords(center_x, center_y, img_w, img_h, patch_size)
+
+            save_patch(image, mask, start_x, start_y, patch_size, base_name, patch_id)
+            patch_id += 1
+
+if __name__ == "__main__":
+    main()

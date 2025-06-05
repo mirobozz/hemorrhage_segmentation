@@ -49,7 +49,7 @@ def save_predictions(model, dataloader, output_dir, alpha=0.5):
                 image = (image * 255).clip(0, 255).astype(np.uint8)
 
                 mask = masks[i].squeeze(0).cpu().numpy()
-                mask = (mask > 0.5).astype(np.uint8) * 255
+                mask = (mask > 0.7).astype(np.uint8) * 255
 
                 prediction = predictions[i].squeeze(0).cpu().numpy()
                 prediction = np.where(prediction > 0.55, 1, 0).astype(np.uint8) * 255
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     output_dir = "C:/Users/mirom/Desktop/preds_temp"
 
     transform = A.Compose([
-        A.Resize(256, 256),
+        A.Resize(512, 512),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ToTensorV2(),
     ])
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     dataloader = dl.create_dataloader(
         images_dir=images_dir,
         masks_dir=masks_dir,
-        batch_size=batch_size,
+        batch_size=1,
         transform=transform,
         shuffle=False,
     )
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         activation=my_utils.config.ACTIVATION,
     )
 
-    model_path = "../train/lwnet_trained.pth"
+    model_path = "../train/best_model.pth"
     checkpoint = torch.load(model_path, map_location=my_utils.config.DEVICE)
     model.load_state_dict(checkpoint["model_state_dict"])
     model = model.to(my_utils.config.DEVICE)

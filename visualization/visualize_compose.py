@@ -116,10 +116,10 @@ def save_predictions_with_shift(model, dataloader, output_dir, alpha=0.5):
 if __name__ == "__main__":
     images_dir = my_utils.config.TEST_IMAGES_DIR
     masks_dir = my_utils.config.TEST_MASKS_DIR
-    output_dir = ("C:/Users/mirom/Desktop/preds_lwnet_clipped_small_1")
+    output_dir = ("C:/Users/mirom/Desktop/preds_temp")
 
     transform = A.Compose([
-        A.Resize(256, 256),
+        A.Resize(128, 128),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         ToTensorV2(),
     ])
@@ -133,14 +133,14 @@ if __name__ == "__main__":
         shuffle=False,
     )
 
-    model = smp.Unet(
+    model = smp.UnetPlusPlus(
         encoder_name=my_utils.config.ENCODER,
         encoder_weights=None,
         classes=len(my_utils.config.CLASSES),
         activation=my_utils.config.ACTIVATION,
     )
 
-    model_path = "../train/test_valid_large_500.pth"
+    model_path = "../train/best_model.pth"
     checkpoint = torch.load(model_path, map_location=my_utils.config.DEVICE)
     model.load_state_dict(checkpoint["model_state_dict"])
     model = model.to(my_utils.config.DEVICE)

@@ -16,7 +16,7 @@ colors = {
     "FN": [255, 193, 203],
 }
 
-PATCH_SIZE = 256
+PATCH_SIZE = 1024
 
 
 def compute_iou(pred, mask):
@@ -139,8 +139,8 @@ def save_predictions_on_patches(model, images_dir, masks_dir, output_dir, transf
 
 
 if __name__ == "__main__":
-    images_dir = "D:/bp_dataset/base_subsets/valid/images"
-    masks_dir = "D:/bp_dataset/base_subsets/valid/masks"
+    images_dir = my_utils.config.TEST_IMAGES_DIR
+    masks_dir = my_utils.config.TEST_MASKS_DIR
     output_dir = "C:/Users/mirom/Desktop/preds_temp"
 
     transform = A.Compose([
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         ToTensorV2(),
     ])
 
-    model = smp.Unet(
+    model = smp.UnetPlusPlus(
         encoder_name=my_utils.config.ENCODER,
         encoder_weights=None,
         classes=len(my_utils.config.CLASSES),

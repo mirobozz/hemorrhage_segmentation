@@ -11,5 +11,5 @@ focal_loss = smp.losses.FocalLoss(mode=smp.losses.BINARY_MODE, alpha=0.75, gamma
 
 
 def combined_loss(predicts, targets):
-    return 0.7 * bce_loss(predicts, targets) + 0.6 * dice_loss(predicts, targets) + 0.2 * focal_loss(predicts, targets)
+    return 0.5 * dice_loss(predicts, targets) + 0.5 * focal_loss(predicts, targets)
 
