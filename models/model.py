@@ -3,25 +3,12 @@ from segmentation_models_pytorch.encoders import get_encoder_names, get_preproce
 from torch import nn
 from my_utils.config import *
 
-
-'''model = smp.UnetPlusPlus(
+model = smp.Unet(
     encoder_name=ENCODER,
     encoder_weights=ENCODER_WEIGHTS,
     classes=len(CLASSES),
     activation=ACTIVATION,
 )
-'''
-
-model = smp.UnetPlusPlus(
-    encoder_name=ENCODER,
-    encoder_weights=ENCODER_WEIGHTS,
-    classes=len(CLASSES),
-    activation=ACTIVATION,
-)
-
-
-#for i, block in enumerate(model.decoder.blocks):
-#    block.add_module("dropout", nn.Dropout(p=0.5))
 
 model.to(DEVICE)
 print(model)
